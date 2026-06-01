@@ -52,5 +52,5 @@ def createChunkByTitle(documents:dict) -> dict[str, List[str]]:
 
     print(f"Created {len(chunks)} chunks")
 
-    return chunks
+    return all_chunks
 
