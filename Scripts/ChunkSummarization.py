@@ -1,15 +1,8 @@
 import json
 from typing import List
-
-from unstructured.partition.pdf import partition_pdf
-from unstructured.chunking.title import chunk_by_title
-
 from langchain_core.documents import Document
-from langchain_ollama import ChatOllama, OllamaEmbeddings
-from langchain_chroma import Chroma
+from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage
-
-
 from typing import List
 
 def mergeTablesWithContext(chunks:str) -> List[str]:
