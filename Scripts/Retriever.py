@@ -1,4 +1,4 @@
-from langchain_community.retrievers import EnsembleRetriever, BM25Retriever
+from langchain_classic.retrievers import EnsembleRetriever, BM25Retriever
 from langchain_cohere import CohereRerank
 from dotenv import load_dotenv
 
