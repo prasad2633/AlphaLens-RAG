@@ -34,24 +34,14 @@ else:
     summarized_chunks = summarizeChunks(chunks)
     saveSummarizedChunks(summarized_chunks)
 
-    vector_store = createVectorStore(
-        summarized_chunks,
-        persist_directory=DB_PATH
-    )
+    vector_store = createVectorStore(summarized_chunks, persist_directory=DB_PATH)
 
 query = "Can you explain me about Multi head attention"
 
 retrieved_summarized_chunks = loadSummarizedChunks()
 
-retrieved_chunks = retrieveChunks(
-    query,
-    vector_store,
-    retrieved_summarized_chunks
-)
+retrieved_chunks = retrieveChunks(query, vector_store, retrieved_summarized_chunks)
 
-final_answer = generateFinalAnswer(
-    retrieved_chunks,
-    query
-)
+final_answer = generateFinalAnswer(retrieved_chunks, query)
 
 print(f"Final answer:\n{final_answer}")
