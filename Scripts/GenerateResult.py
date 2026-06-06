@@ -3,22 +3,24 @@ import os
 import json
 import base64
 from dotenv import load_dotenv
+from utils.RetryWrapper import retry_on_failure
 
 load_dotenv()
 
 
+@retry_on_failure()
 def generateFinalAnswer(chunks, query):
     try:
         client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
         prompt_text = f"""
-Based on the following documents, answer this question:
+        Based on the following documents, answer this question:
 
-QUESTION:
-{query}
+        QUESTION:
+        {query}
 
-CONTENT TO ANALYZE:
-"""
+        CONTENT TO ANALYZE:
+        """
 
         for i, chunk in enumerate(chunks):
             prompt_text += f"\n---- Document {i+1} ----\n"
