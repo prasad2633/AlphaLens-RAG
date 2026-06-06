@@ -1,7 +1,7 @@
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 
-def createVectorStore(documents:str, persist_directory='./db/chroma_db'):
+def createVectorStore(documents, persist_directory='./db/chroma_db'):
     """
     This creates vector store using the chunks
     """

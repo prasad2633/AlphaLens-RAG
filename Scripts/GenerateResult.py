@@ -64,7 +64,9 @@ to answer that question."
 ANSWER:
 """
 
-        contents = [prompt_text]
+        # Use a heterogeneous list to hold the prompt text and any binary/image parts
+        contents = []
+        contents.append(prompt_text)
 
         # Add images
         for chunk in chunks:

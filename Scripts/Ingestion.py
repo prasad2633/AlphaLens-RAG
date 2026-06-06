@@ -20,7 +20,7 @@ def partitionDocument(folder_path:str) -> dict[str, List[str]]:
         print(f"Partitioning file: {pdf_file}")
         
         elements = partition_pdf(
-            filename=pdf_file,
+            filename=str(pdf_file),
             strategy="hi_res", # Use the most accurate processing method for extraction (but slow)
             infer_table_structure=True, #keep tables as structured html not jumbled text
             extract_image_block_types=["Image"], #grab images found in the pdf

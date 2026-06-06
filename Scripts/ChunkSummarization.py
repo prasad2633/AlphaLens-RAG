@@ -1,11 +1,10 @@
 import json
-from typing import List
 from langchain_core.documents import Document
 from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage
-from typing import List
+from typing import List, Any, cast
 
-def mergeTablesWithContext(chunks:str) -> List[str]:
+def mergeTablesWithContext(chunks):
     merged = []
     
     for i, chunk in enumerate(chunks):
@@ -26,7 +25,7 @@ def mergeTablesWithContext(chunks:str) -> List[str]:
     
     return merged
 
-def createAiEnhancedSummary(text: str, tables: List[str], images: List[str]) -> str:
+def createAiEnhancedSummary(text, tables, images):
     try:
         llm = ChatOllama(model="gemma3:latest")
 
@@ -62,10 +61,11 @@ def createAiEnhancedSummary(text: str, tables: List[str], images: List[str]) -> 
         for image_base64 in images:
             message_content.append({
                 "type": "image_url",
-                "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
+                "image_url": f"data:image/jpeg;base64,{image_base64}"
                 })
 
-        message = HumanMessage(content = message_content)
+        # cast to satisfy HumanMessage typing which expects Sequence[Any]
+        message = HumanMessage(content = cast(List[Any], message_content))
         response = llm.invoke([message])
 
         return response.content
@@ -81,7 +81,7 @@ def createAiEnhancedSummary(text: str, tables: List[str], images: List[str]) -> 
 
         return summary
 
-def seperateContentTypes(chunk:str) -> dict[str,List[str]]:
+def seperateContentTypes(chunk):
     content_data = {
         'text': chunk.text,
         'tables': [],
@@ -109,7 +109,7 @@ def seperateContentTypes(chunk:str) -> dict[str,List[str]]:
     return content_data
             
 
-def summarizeChunks(all_chunks:dict) -> dict[str, List[str]]:
+def summarizeChunks(all_chunks):
     print("Processing chunks with AI summarization")
     
     all_langchain_doc = {}
@@ -142,8 +142,14 @@ def summarizeChunks(all_chunks:dict) -> dict[str, List[str]]:
                 print(f" Using raw text (no tables/ images)")
                 enhanced_content = content_data['text']
 
+            # Ensure page_content is a string (Document expects str)
+            if isinstance(enhanced_content, (list, dict)):
+                page_content = json.dumps(enhanced_content)
+            else:
+                page_content = str(enhanced_content)
+
             doc = Document(
-                page_content=enhanced_content,
+                page_content=page_content,
                 metadata={
                     "original_content": json.dumps({
                         "raw_text": content_data['text'],
