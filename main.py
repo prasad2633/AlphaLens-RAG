@@ -8,11 +8,13 @@ from Scripts.GenerateResult import generateFinalAnswer
 from utils.SaveSummarizedChunks import saveSummarizedChunks, loadSummarizedChunks
 from utils.AnswerSimplifier import AnswerSimplifierModels
 from postprocess.CleanOutput import cleanAnswer
+from utils.HistoryAwareGeneration import historyAwareGeneration
+from db_connections.CreateTables import createTables
 
-
-def main(query: str, FORCE_REBUILD=False):
+def main(query: str, conversation_id, FORCE_REBUILD=False):
 
     DB_PATH = "./db/chroma_db"
+    HISTORY_DB = "./db/sqlDB"
 
     if Path(DB_PATH).exists() and not FORCE_REBUILD:
 
@@ -40,13 +42,20 @@ def main(query: str, FORCE_REBUILD=False):
 
     retrieved_summarized_chunks = loadSummarizedChunks()
 
-    retrieved_chunks = retrieveChunks(query, vector_store, retrieved_summarized_chunks)
+    # retrieved_chunks = retrieveChunks(query, vector_store, retrieved_summarized_chunks)
 
-    generated_answer = generateFinalAnswer(retrieved_chunks, query)
-
+    # generated_answer = generateFinalAnswer(retrieved_chunks, query)
+    
+    createTables()
+        
+    generated_answer = historyAwareGeneration(query, vector_store, retrieved_summarized_chunks, conversation_id)
+    
     answerSimplifier = AnswerSimplifierModels()
     final_answer = answerSimplifier.gemmaAnswerSimplifier(generated_answer)
 
     final_answer = cleanAnswer(final_answer)
 
     return final_answer
+
+if __name__ == '__main__':
+    main(query='What is attention mechanism',conversation_id='abcde')

@@ -7,7 +7,6 @@ from utils.RetryWrapper import retry_on_failure
 
 load_dotenv()
 
-
 @retry_on_failure()
 def generateFinalAnswer(chunks, query):
     try:
