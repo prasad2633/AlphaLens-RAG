@@ -6,52 +6,47 @@ from utils.LoadVectorStore import loadVectorStore
 from Scripts.Retriever import retrieveChunks
 from Scripts.GenerateResult import generateFinalAnswer
 from utils.SaveSummarizedChunks import saveSummarizedChunks, loadSummarizedChunks
+from utils.AnswerSimplifier import AnswerSimplifierModels
+from postprocess.CleanOutput import cleanAnswer
 
-DB_PATH = "./db/chroma_db"
 
-# Change to True whenever you want to rebuild
-FORCE_REBUILD = True
+def main(query: str, FORCE_REBUILD=False):
 
-if Path(DB_PATH).exists() and not FORCE_REBUILD:
+    DB_PATH = "./db/chroma_db"
 
-    print("Loading existing vector database...")
+    if Path(DB_PATH).exists() and not FORCE_REBUILD:
 
-    vector_store = loadVectorStore(DB_PATH)
+        print("Loading existing vector database...")
 
-else:
+        vector_store = loadVectorStore(DB_PATH)
 
-    print("Building vector database from scratch...")
+    else:
 
-    documents = partitionDocument(folder_path="./dataset_2")
+        print("Building vector database from scratch...")
 
-    elements = set([str(type(ele)) for ele in documents.keys()])
-    print(f"Document partition has been created:\n{elements}")
+        documents = partitionDocument(folder_path="./dataset_2")
 
-    chunks = createChunkByTitle(documents=documents)
-    print(f"\n\nChunks are created: {chunks.keys()}")
+        elements = set([str(type(ele)) for ele in documents.keys()])
+        print(f"Document partition has been created:\n{elements}")
 
-    print("Starting summarize chunks")
-    summarized_chunks = summarizeChunks(chunks)
-    saveSummarizedChunks(summarized_chunks)
+        chunks = createChunkByTitle(documents=documents)
+        print(f"\n\nChunks are created: {chunks.keys()}")
 
-    vector_store = createVectorStore(
-        summarized_chunks,
-        persist_directory=DB_PATH
-    )
+        print("Starting summarize chunks")
+        summarized_chunks = summarizeChunks(chunks)
+        saveSummarizedChunks(summarized_chunks)
 
-query = "Can you explain me about Multi head attention"
+        vector_store = createVectorStore(summarized_chunks, persist_directory=DB_PATH)
 
-retrieved_summarized_chunks = loadSummarizedChunks()
+    retrieved_summarized_chunks = loadSummarizedChunks()
 
-retrieved_chunks = retrieveChunks(
-    query,
-    vector_store,
-    retrieved_summarized_chunks
-)
+    retrieved_chunks = retrieveChunks(query, vector_store, retrieved_summarized_chunks)
 
-final_answer = generateFinalAnswer(
-    retrieved_chunks,
-    query
-)
+    generated_answer = generateFinalAnswer(retrieved_chunks, query)
 
-print(f"Final answer:\n{final_answer}")
+    answerSimplifier = AnswerSimplifierModels()
+    final_answer = answerSimplifier.gemmaAnswerSimplifier(generated_answer)
+
+    final_answer = cleanAnswer(final_answer)
+
+    return final_answer
