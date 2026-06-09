@@ -4,9 +4,9 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-
 class QueryRequest(BaseModel):
     query: str
+    conversation_id: str
 
 
 @app.get("/")
@@ -16,5 +16,5 @@ def health():
 
 @app.post("/query")
 def query(data: QueryRequest):
-    answer = main(data.query)
+    answer = main(data.query, data.conversation_id)
     return {"answer": answer}
